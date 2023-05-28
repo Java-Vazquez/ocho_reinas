@@ -12,11 +12,12 @@ El código aquí presentado busca resolver de manera eficiente el problema de la
 Intrucciones: 
 
 """
-"""Dependencias"""
+"""Dependencia"""
 import heapq
 import random
+import time
 
-"""Clases y funciones de apoyo"""
+"""CLASES Y FUNCIONES DE APOYO"""
 
 """ La función menu busca implementar un menú para facilitar el uso del programa, dando opciones variadas  que el usuario puede elegir """
 def menu():
@@ -43,13 +44,20 @@ def menu():
                 board = None
 
             # Resolver el problema de las reinas utilizando el estado inicial proporcionado
+            start_time = time.time()
             solution = solve_n_queens_a_star(n, board)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+
             if solution is None:
                 print("No existe una solución para el problema de las %d reinas." % n)
             else:
+                print("\nEstado final del tablero (solución):\n")
                 print_board(solution)
+                
+            print("\nTiempo de ejecución:", elapsed_time, "segundos\n")
 
-        elif opcion == "2":
+        elif opcion == "2": #Opción con información adicional
             n = int(input("Ingresa el valor de N: "))
             initial_board = input("¿Deseas ingresar un estado inicial? (S/N): ")
 
@@ -64,11 +72,18 @@ def menu():
                 board = None
 
             # Resolver el problema de las reinas utilizando el estado inicial proporcionado
+            start_time = time.time()
             solution = solve_n_queens_a_star(n, board)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+
             if solution is None:
                 print("No existe una solución para el problema de las %d reinas." % n)
             else:
+                print("Estado final del tablero (solución):")
                 print_board(solution)
+
+            print("\nTiempo de ejecución:", elapsed_time, "segundos\n")
 
         elif opcion == "3":
             print("Saliendo del programa...")
@@ -77,6 +92,10 @@ def menu():
             print("Opción inválida. Por favor, selecciona una opción válida.")
 
 
+"""La función print_board imprime el tablero en la consola."""
+def print_board(board):
+    for row in board:
+        print(row)
 
 """El objetivo de la clase State es representar un estado del problema en el contexto del algoritmo A*. 
 Cada objeto de la clase State almacena información sobre el tablero, la posición actual de la reina, 
@@ -100,16 +119,20 @@ class State:
         # Método para comparar dos estados basado en la suma del costo y la heurística
         return (self.cost + self.heuristic) < (other.cost + other.heuristic)
 
-
+"""La función get_random_initial_state(N) se utiliza para obtener un estado inicial aleatorio en el problema de las reinas. 
+Esta función crea un tablero vacío de tamaño NxN y luego coloca N reinas de forma aleatoria en el tablero. 
+Las reinas se colocan en filas diferentes y en columnas seleccionadas al azar, asegurando que no haya dos reinas en la misma columna. 
+El resultado es un tablero que representa un estado inicial aleatorio para resolver el problema de las reinas, 
+donde cada casilla con el valor 1 indica la presencia de una reina en esa posición del tablero."""
 # Función para obtener un estado inicial aleatorio
 def get_random_initial_state(N):
-    board = [[0 for _ in range(N)] for _ in range(N)]
-    for row in range(N):
-        col = random.randint(0, N-1)
+    board = [[0] * N for _ in range(N)]
+    queens = random.sample(range(N), N)
+    for row, col in enumerate(queens):
         board[row][col] = 1
     return board
 
-"""Funciones principales"""
+"""FUNCIONES PRINCIPALES"""
 
 """ La función calculate_heuristic calcula la heurística para un tablero dado. 
 Recorre todas las posiciones del tablero y suma puntos por cada reina que esté en la misma fila, columna o diagonal. 
@@ -152,6 +175,7 @@ def calculate_heuristic(board, N):
                     if i - k >= 0 and j + k < N and board[i - k][j + k] == 1:
                         heuristic += 1
     return heuristic
+
 
 """La función is_safe verifica si es seguro colocar una reina en una posición determinada del tablero. 
 Comprueba si hay reinas en la misma fila, diagonal superior izquierda y diagonal inferior izquierda.
@@ -209,17 +233,26 @@ Cada sucesor tiene un nuevo tablero, un costo incrementado en 1 y una nueva heur
 Estos sucesores se agregan a la cola de prioridad.
 El bucle continúa hasta que se encuentre una solución o no haya más estados por explorar."""
 def solve_n_queens_a_star(N, initial_board):
-    # Crear un tablero vacío de tamaño NxN
+    # Crear un tablero vacío de tamaño NxN, creando una matriz bidimensional de tamaño NxN y la inicializa con ceros.
     board = [[0 for _ in range(N)] for _ in range(N)]
+    empty_board = [[0 for _ in range(N)] for _ in range(N)]
 
     if initial_board is not  None:
         # Copiar el estado inicial proporcionado por el usuario al tablero
         for i in range(N):
             for j in range(N):
                 board[i][j] = initial_board[i][j]
-                
+    else: 
+      board = get_random_initial_state(N)
+
+
+    print("\nEstado inicial del tablero: \n")
+    print_board(board)
+    print("\n......................\n")
+
+
     # Crear el estado inicial con el tablero vacío y la heurística inicial
-    initial_state = State(board, 0, 0, 0, calculate_heuristic(board, N))
+    initial_state = State(empty_board, 0, 0, 0, calculate_heuristic(empty_board, N))
 
     # Crear una cola de prioridad (heap) para almacenar los estados
     heap = []
@@ -254,10 +287,5 @@ def solve_n_queens_a_star(N, initial_board):
     # Si no se encontró ninguna solución, retornar None
     return None
 
-"""La función print_board imprime el tablero en la consola."""
-def print_board(board):
-    for row in board:
-        print(row)
-
-
+#Llamada a la función menu para ejecutar el menú y empezar el programa.
 menu()
