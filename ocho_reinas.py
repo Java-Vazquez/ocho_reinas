@@ -1,5 +1,6 @@
 import heapq
 
+# Clase que representa un estado del problema
 class State:
     def __init__(self, board, row, col, cost, heuristic):
         self.board = board
@@ -9,8 +10,10 @@ class State:
         self.heuristic = heuristic
 
     def __lt__(self, other):
+        # Método para comparar dos estados basado en la suma del costo y la heurística
         return (self.cost + self.heuristic) < (other.cost + other.heuristic)
 
+# Función para calcular la heurística de un tablero dado
 def calculate_heuristic(board, N):
     heuristic = 0
     for i in range(N):
@@ -34,6 +37,7 @@ def calculate_heuristic(board, N):
                         heuristic += 1
     return heuristic
 
+# Función para verificar si es seguro colocar una reina en una posición del tablero
 def is_safe(board, row, col, N):
     # Verificar si hay una reina en la misma fila
     for i in range(col):
@@ -52,6 +56,7 @@ def is_safe(board, row, col, N):
 
     return True
 
+# Función principal que resuelve el problema de las N reinas utilizando A*
 def solve_n_queens_a_star(N):
     board = [[0 for _ in range(N)] for _ in range(N)]
     initial_state = State(board, 0, 0, 0, calculate_heuristic(board, N))
