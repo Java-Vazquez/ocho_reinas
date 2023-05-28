@@ -1,6 +1,30 @@
+"""
+Problema de las 8 reinas
+Universidad Panamericana
+Inteligencia Artificial
+Francisco Anaya Viveros
+Joel Vázquez Anaya
+Javier Vázquez Gurrola
+Generación del archivo: 22/05/2023
+Fecha de entrega: 01/06/2023
+Versión 1.3
+El código aquí presentado busca resolver de manera eficiente el problema de las 8 reinas con una implementación del algoritmo A* (A estrella)
+Intrucciones: 
+
+"""
+"""Dependencias"""
 import heapq
 
-# Clase que representa un estado del problema
+"""Clases y funciones de apoyo"""
+
+"""El objetivo de la clase State es representar un estado del problema en el contexto del algoritmo A*. 
+Cada objeto de la clase State almacena información sobre el tablero, la posición actual de la reina, 
+el costo acumulado hasta ese estado y el valor heurístico asociado.
+La clase State tiene los siguientes atributos:
+board: una matriz que representa el tablero con las reinas colocadas.
+row y col: las coordenadas de la próxima casilla a explorar.
+cost: el costo acumulado para llegar al estado actual.
+heuristic: la heurística estimada para el estado actual."""
 class State:
     def __init__(self, board, row, col, cost, heuristic):
         self.board = board
@@ -9,11 +33,34 @@ class State:
         self.cost = cost
         self.heuristic = heuristic
 
+#La clase State también define el método especial __lt__ que compara dos objetos State en función de la suma del costo y la heurística. 
+#Esto permite utilizar la clase en una cola de prioridad para garantizar que los estados se expandan en el orden adecuado durante la búsqueda A*.
     def __lt__(self, other):
         # Método para comparar dos estados basado en la suma del costo y la heurística
         return (self.cost + self.heuristic) < (other.cost + other.heuristic)
 
-# Función para calcular la heurística de un tablero dado
+
+"""Funciones principales"""
+
+""" La función calculate_heuristic calcula la heurística para un tablero dado. 
+Recorre todas las posiciones del tablero y suma puntos por cada reina que esté en la misma fila, columna o diagonal. 
+También suma puntos por cada reina en las diagonales secundarias.
+La heurística se calcula contando el número de reinas que amenazan a otras reinas en el tablero:
+Se inicializa la variable heuristic en 0.
+Se recorre cada celda del tablero utilizando dos bucles for anidados, donde i representa la fila y j representa la columna.
+Si la celda (i, j) contiene una reina (valor 1), se procede a verificar si hay otras reinas en la misma fila, misma columna o en las diagonales.
+Para verificar si hay una reina en la misma fila, se utiliza otro bucle for desde 0 hasta N, donde k representa la columna. 
+Si se encuentra una reina en la misma fila (en la posición (i, k) con k != j), se incrementa la heurística en 1.
+Para verificar si hay una reina en la misma columna, se utiliza otro bucle for desde 0 hasta N, donde k representa la fila. 
+Si se encuentra una reina en la misma columna (en la posición (k, j) con k != i), se incrementa la heurística en 1.
+Para verificar las diagonales, se utilizan cuatro bucles for anidados con diferentes rangos y condiciones. 
+Se recorren las diagonales principales y secundarias a partir de la posición de la reina en (i, j).
+Para las diagonales principales, se verifica si hay una reina en las posiciones (i+k, j+k), (i-k, j-k), (i+k, j-k), (i-k, j+k) con k desde 1 hasta N-1. 
+Si se encuentra una reina en cualquiera de estas posiciones, se incrementa la heurística en 1.
+Para las diagonales secundarias, se verifica si hay una reina en las posiciones (i+k, j-k), (i-k, j+k), (i+k, j+k), (i-k, j-k) con k desde 1 hasta N-1. 
+Si se encuentra una reina en cualquiera de estas posiciones, se incrementa la heurística en 1.
+Al finalizar los bucles, se retorna el valor de la heurística, que representa el número de reinas que se amenazan mutuamente en el tablero.
+"""
 def calculate_heuristic(board, N):
     heuristic = 0
     for i in range(N):
@@ -37,7 +84,33 @@ def calculate_heuristic(board, N):
                         heuristic += 1
     return heuristic
 
-# Función para verificar si es seguro colocar una reina en una posición del tablero
+"""La función is_safe verifica si es seguro colocar una reina en una posición determinada del tablero. 
+Comprueba si hay reinas en la misma fila, diagonal superior izquierda y diagonal inferior izquierda.
+La función is_safe se encarga de verificar si es seguro colocar una reina en una determinada posición del tablero. 
+
+Verificación de la misma fila:
+Se recorre la fila desde la columna 0 hasta la columna anterior a la posición actual (col).
+Si se encuentra una reina en alguna de las celdas de la misma fila (board[row][i] == 1), significa que ya hay una reina en esa fila y, por lo tanto, 
+no es seguro colocar una reina en la posición actual.
+En este caso, se retorna False indicando que no es seguro.
+
+Verificación de la misma diagonal superior izquierda:
+Se utilizan los bucles zip para iterar simultáneamente en dos rangos: desde la fila actual (row) hacia arriba y desde la columna actual (col) hacia la izquierda.
+Se compara si hay una reina en cada celda correspondiente a la diagonal superior izquierda (board[i][j] == 1).
+Si se encuentra una reina en alguna de las celdas de la misma diagonal, indica que ya hay una reina en esa diagonal y, 
+por lo tanto, no es seguro colocar una reina en la posición actual.
+En este caso, se retorna False indicando que no es seguro.
+
+Verificación de la misma diagonal inferior izquierda:
+Se utilizan los bucles zip para iterar simultáneamente en dos rangos: desde la fila actual (row) hacia abajo y desde la columna actual (col) hacia la izquierda.
+Se compara si hay una reina en cada celda correspondiente a la diagonal inferior izquierda (board[i][j] == 1).
+Si se encuentra una reina en alguna de las celdas de la misma diagonal, indica que ya hay una reina en esa diagonal y, 
+por lo tanto, no es seguro colocar una reina en la posición actual.
+En este caso, se retorna False indicando que no es seguro.
+Si ninguna de las verificaciones anteriores detecta una amenaza de otras reinas en la misma fila o en las diagonales, 
+se asume que es seguro colocar una reina en la posición actual y se retorna True. 
+Esto indica que la posición actual es válida y no hay reinas que se amenacen directamente desde esa posición.
+"""
 def is_safe(board, row, col, N):
     # Verificar si hay una reina en la misma fila
     for i in range(col):
@@ -56,35 +129,65 @@ def is_safe(board, row, col, N):
 
     return True
 
-# Función principal que resuelve el problema de las N reinas utilizando A*
+"""Función principal que resuelve el problema de las N reinas utilizando A*
+La función solve_n_queens_a_star resuelve el problema de las N reinas utilizando el algoritmo A*. 
+Comienza con un tablero vacío y crea un estado inicial con costo cero y la heurística calculada para ese tablero. 
+Luego, se crea una cola de prioridad (heap) y se inserta el estado inicial en ella.
+El bucle principal sigue extrayendo el estado con menor costo de la cola de prioridad. 
+Si se alcanza la última fila del tablero, se ha encontrado una solución y se devuelve el tablero. 
+Si no, se generan los sucesores del estado actual colocando una reina en cada columna segura. 
+Cada sucesor tiene un nuevo tablero, un costo incrementado en 1 y una nueva heurística calculada para el nuevo tablero. 
+Estos sucesores se agregan a la cola de prioridad.
+El bucle continúa hasta que se encuentre una solución o no haya más estados por explorar."""
 def solve_n_queens_a_star(N):
+    # Crear un tablero vacío de tamaño NxN
     board = [[0 for _ in range(N)] for _ in range(N)]
+
+    # Crear el estado inicial con el tablero vacío y la heurística inicial
     initial_state = State(board, 0, 0, 0, calculate_heuristic(board, N))
+
+    # Crear una cola de prioridad (heap) para almacenar los estados
     heap = []
     heapq.heappush(heap, initial_state)
 
     while heap:
+        # Obtener el estado actual de la cola de prioridad (el estado con menor costo + heurística)
         current_state = heapq.heappop(heap)
 
+        # Verificar si se han colocado todas las reinas (se ha alcanzado la última fila)
         if current_state.row >= N:
             return current_state.board
 
+        # Probar todas las columnas en la fila actual para colocar una reina
         for col in range(N):
+            # Verificar si es seguro colocar una reina en la posición actual
             if is_safe(current_state.board, current_state.row, col, N):
+                # Crear una copia del tablero actual y colocar una reina en la posición actual
                 new_board = [row[:] for row in current_state.board]
                 new_board[current_state.row][col] = 1
+
+                # Calcular el nuevo costo y la nueva heurística para el estado actualizado
                 new_cost = current_state.cost + 1
                 new_heuristic = calculate_heuristic(new_board, N)
+
+                # Crear un nuevo estado con el tablero actualizado y la nueva información
                 new_state = State(new_board, current_state.row + 1, col, new_cost, new_heuristic)
+
+                # Agregar el nuevo estado a la cola de prioridad
                 heapq.heappush(heap, new_state)
 
+    # Si no se encontró ninguna solución, retornar None
     return None
 
+"""La función print_board imprime el tablero en la consola."""
 def print_board(board):
     for row in board:
         print(row)
 
-# Ejemplo de uso: resolver el problema de las 4 reinas
+"""Ejemplo de uso: resolver el problema de las 8 reinas
+Se establece el valor de N para el problema de las N reinas, en este caso 8 y se llama a la función solve_n_queens_a_star para resolver el problema. 
+Si no se encuentra una solución, se muestra un mensaje indicando que no existe una solución para ese valor de N. 
+De lo contrario, se imprime el tablero de la solución encontrada."""
 N = 8
 solution = solve_n_queens_a_star(N)
 
