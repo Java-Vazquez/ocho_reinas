@@ -44,8 +44,9 @@ def menu():
                 board = None
 
             # Resolver el problema de las reinas utilizando el estado inicial proporcionado
+            iteraciones = 0
             start_time = time.time()
-            solution = solve_n_queens_a_star(n, board)
+            solution,iteraciones = solve_n_queens_a_star(n, board, iteraciones)
             end_time = time.time()
             elapsed_time = end_time - start_time
 
@@ -54,26 +55,32 @@ def menu():
             else:
                 print("\nEstado final del tablero (solución):\n")
                 print_board(solution)
+                print("Las iteraciones que hizo el código son: ", iteraciones)
                 
             print("\nTiempo de ejecución:", elapsed_time, "segundos\n")
 
         elif opcion == "2": #Opción con información adicional
             n = int(input("Ingresa el valor de N: "))
-            initial_board = input("¿Deseas ingresar un estado inicial? (S/N): ")
-
+            initial_board_con_pasos = input("¿Deseas ingresar un estado inicial? (S/N): ")
+            print("El valor de n es: ", n)
+            print("El valor de estado inical es: ", initial_board_con_pasos)
             # Verificar si el usuario desea ingresar un estado inicial
-            if initial_board.upper() == "S":
+            if initial_board_con_pasos.upper() == "S":
                 print("Ingrese el estado inicial de las reinas:")
                 board = []
                 for _ in range(n):
                     row = input().split()
+                    print("La fila es: ", row)
                     board.append([int(val) for val in row])
+                    print("Los bordes son: ", board.append([int(val) for val in row]))
+                    
             else:
                 board = None
 
             # Resolver el problema de las reinas utilizando el estado inicial proporcionado
+            iteraciones = 0  # Variable para contar las iteraciones
             start_time = time.time()
-            solution = solve_n_queens_a_star(n, board)
+            solution, iteraciones = solve_n_queens_a_star_con_pasos(n, board, iteraciones)
             end_time = time.time()
             elapsed_time = end_time - start_time
 
@@ -82,6 +89,7 @@ def menu():
             else:
                 print("Estado final del tablero (solución):")
                 print_board(solution)
+                print("Las iteraciones que hizo el código son: ", iteraciones)
 
             print("\nTiempo de ejecución:", elapsed_time, "segundos\n")
 
@@ -132,6 +140,19 @@ def get_random_initial_state(N):
         board[row][col] = 1
     return board
 
+def get_random_initial_state_con_pasos(N):
+    board = [[0] * N for _ in range(N)]
+    print("Delimitamos los bordes del tablero, de la siguiente  [[0] * N for _ in range(N)]")
+    print(board)
+    queens = random.sample(range(N), N)
+    print("Colocamos las reinas de manera aleatoria en el tablero")
+    print(queens)
+    for row, col in enumerate(queens):
+        board[row][col] = 1
+        print("Se cloca una reina en cada intersección de la columna y fila del tablero")
+        print(board[row][col])
+    return board
+
 """FUNCIONES PRINCIPALES"""
 
 """ La función calculate_heuristic calcula la heurística para un tablero dado. 
@@ -176,6 +197,36 @@ def calculate_heuristic(board, N):
                         heuristic += 1
     return heuristic
 
+def calculate_heuristic_con_pasos(board, N):
+    heuristic_con_pasos = 0
+    for i in range(N):
+        for j in range(N):
+            if board[i][j] == 1:
+                # Verificar si hay una reina en la misma fila o diagonal
+                print("Verificar si hay una reina en la misma fila o diagonal")
+                for k in range(N):
+                    if board[i][k] == 1 and k != j:
+                        heuristic_con_pasos += 1
+                        print(heuristic_con_pasos)
+                    if board[k][j] == 1 and k != i:
+                        heuristic_con_pasos += 1
+                        print(heuristic_con_pasos)
+                # Verificar si hay una reina en las diagonales secundarias
+                print("Verificar si hay una reina en las diagonales secundarias")
+                for k in range(1, N):
+                    if i + k < N and j + k < N and board[i + k][j + k] == 1:
+                        heuristic_con_pasos += 1
+                        print(heuristic_con_pasos)
+                    if i - k >= 0 and j - k >= 0 and board[i - k][j - k] == 1:
+                        heuristic_con_pasos += 1
+                        print(heuristic_con_pasos)
+                    if i + k < N and j - k >= 0 and board[i + k][j - k] == 1:
+                        heuristic_con_pasos += 1
+                        print(heuristic_con_pasos)
+                    if i - k >= 0 and j + k < N and board[i - k][j + k] == 1:
+                        heuristic_con_pasos += 1
+                        print(heuristic_con_pasos)
+    return heuristic_con_pasos
 
 """La función is_safe verifica si es seguro colocar una reina en una posición determinada del tablero. 
 Comprueba si hay reinas en la misma fila, diagonal superior izquierda y diagonal inferior izquierda.
@@ -222,6 +273,31 @@ def is_safe(board, row, col, N):
 
     return True
 
+def is_safe_con_pasos(board, row, col, N):
+    iteracion = 0
+    # Verificar si hay una reina en la misma fila
+    print("Verificar si hay una reina en la misma fila")
+    for i in range(col):
+        if board[row][i] == 1:
+            print( board[row][i])
+            return False
+
+    # Verificar si hay una reina en la misma diagonal superior izquierda
+    print("Verificar si hay una reina en la misma diagonal superior izquierda")
+    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
+        if board[i][j] == 1:
+            print(board[i][j])
+            return False
+
+    # Verificar si hay una reina en la misma diagonal inferior izquierda
+    print("Verificar si hay una reina en la misma diagonal inferior izquierda")
+    for i, j in zip(range(row, N, 1), range(col, -1, -1)):
+        if board[i][j] == 1:
+            print(board[i][j])
+            return False
+
+    return True
+
 """Función principal que resuelve el problema de las N reinas utilizando A*
 La función solve_n_queens_a_star resuelve el problema de las N reinas utilizando el algoritmo A*. 
 Comienza con un tablero vacío y crea un estado inicial con costo cero y la heurística calculada para ese tablero. 
@@ -232,7 +308,7 @@ Si no, se generan los sucesores del estado actual colocando una reina en cada co
 Cada sucesor tiene un nuevo tablero, un costo incrementado en 1 y una nueva heurística calculada para el nuevo tablero. 
 Estos sucesores se agregan a la cola de prioridad.
 El bucle continúa hasta que se encuentre una solución o no haya más estados por explorar."""
-def solve_n_queens_a_star(N, initial_board):
+def solve_n_queens_a_star(N, initial_board,iteraciones):
     # Crear un tablero vacío de tamaño NxN, creando una matriz bidimensional de tamaño NxN y la inicializa con ceros.
     board = [[0 for _ in range(N)] for _ in range(N)]
     empty_board = [[0 for _ in range(N)] for _ in range(N)]
@@ -257,14 +333,14 @@ def solve_n_queens_a_star(N, initial_board):
     # Crear una cola de prioridad (heap) para almacenar los estados
     heap = []
     heapq.heappush(heap, initial_state)
-
+    
     while heap:
         # Obtener el estado actual de la cola de prioridad (el estado con menor costo + heurística)
         current_state = heapq.heappop(heap)
 
         # Verificar si se han colocado todas las reinas (se ha alcanzado la última fila)
         if current_state.row >= N:
-            return current_state.board
+            return (current_state.board, iteraciones)
 
         # Probar todas las columnas en la fila actual para colocar una reina
         for col in range(N):
@@ -283,8 +359,100 @@ def solve_n_queens_a_star(N, initial_board):
 
                 # Agregar el nuevo estado a la cola de prioridad
                 heapq.heappush(heap, new_state)
+        iteraciones += 1  # Incrementar el contador de iteraciones
 
     # Si no se encontró ninguna solución, retornar None
+    return None
+
+def solve_n_queens_a_star_con_pasos(N, initial_board_con_pasos, iteraciones):
+    # Crear un tablero vacío de tamaño NxN, creando una matriz bidimensional de tamaño NxN y la inicializa con ceros.
+    board = [[0 for _ in range(N)] for _ in range(N)]
+    empty_board = [[0 for _ in range(N)] for _ in range(N)]
+    print("Crear un tablero vacío de tamaño NxN, creando una matriz bidimensional de tamaño NxN y la inicializa con ceros.")
+    print(board)
+    print("---------------------------------------------------------------------------------------------------")
+    print(empty_board)
+
+    if initial_board_con_pasos is not  None:
+        # Copiar el estado inicial proporcionado por el usuario al tablero
+        print("Copiar el estado inicial proporcionado por el usuario al tablero")
+        for i in range(N):
+            for j in range(N):
+                board[i][j] = initial_board_con_pasos[i][j]
+                print(board[i][j])
+    else: 
+        print("Creamos un tablero aleatorio")
+        board = get_random_initial_state_con_pasos(N)
+        print(board)
+
+
+    print("\nEstado inicial del tablero: \n")
+    print_board(board)
+    print("\n......................\n")
+
+
+    # Crear el estado inicial con el tablero vacío y la heurística inicial
+    print("Crear el estado inicial con el tablero vacío y la heurística inicial")
+    initial_state = State(empty_board, 0, 0, 0, calculate_heuristic_con_pasos(empty_board, N))
+    print(initial_state)
+
+    # Crear una cola de prioridad (heap) para almacenar los estados
+    print("Crear una cola de prioridad (heap) para almacenar los estados")
+    heap = []
+    heapq.heappush(heap, initial_state)
+    print(heapq.heappush(heap, initial_state))
+    
+
+    while heap:
+        # Obtener el estado actual de la cola de prioridad (el estado con menor costo + heurística)
+        current_state = heapq.heappop(heap)
+        print("Obtener el estado actual de la cola de prioridad (el estado con menor costo + heurística)")
+        print(current_state)        
+
+        # Verificar si se han colocado todas las reinas (se ha alcanzado la última fila)
+        print("Verificar si se han colocado todas las reinas (se ha alcanzado la última fila)")
+        if current_state.row >= N: 
+            print(current_state.board)
+            return (current_state.board, iteraciones)
+
+        # Probar todas las columnas en la fila actual para colocar una reina
+        print("Probar todas las columnas en la fila actual para colocar una reina")
+        for col in range(N):
+            print("Recorremos todas las columnas que tiene el tablero")
+            # Verificar si es seguro colocar una reina en la posición actual
+            print("Verificar si es seguro colocar una reina en la posición actual")
+            if is_safe(current_state.board, current_state.row, col, N):
+                print("Crear una copia del tablero actual y colocar una reina en la posición actual")
+                # Crear una copia del tablero actual y colocar una reina en la posición actual
+                new_board = [row[:] for row in current_state.board]
+                new_board[current_state.row][col] = 1
+                print(new_board)
+                print("Colocamos una reina si es seguro en la posición actual")
+                print(new_board[current_state.row][col])
+
+                # Calcular el nuevo costo y la nueva heurística para el estado actualizado
+                print("Calcular el nuevo costo y la nueva heurística para el estado actualizado")
+                new_cost = current_state.cost + 1
+                new_heuristic = calculate_heuristic_con_pasos(new_board, N)
+                print(new_cost)
+                print("Actualizamos el valor del costo en la heuristica")
+                print(new_heuristic)
+
+                # Crear un nuevo estado con el tablero actualizado y la nueva información
+                print("Crear un nuevo estado con el tablero actualizado y la nueva información")
+                new_state = State(new_board, current_state.row + 1, col, new_cost, new_heuristic)
+                print(State)
+
+                # Agregar el nuevo estado a la cola de prioridad
+                print("Agregar el nuevo estado a la cola de prioridad")
+                heapq.heappush(heap, new_state)
+                print(heapq.heappush(heap, new_state))
+                
+        iteraciones += 1  # Incrementar el contador de iteraciones
+
+    # Si no se encontró ninguna solución, retornar None
+    print("Si no se encontró ninguna solución, retornar None")
+    print("Número de iteraciones:", iteraciones)
     return None
 
 #Llamada a la función menu para ejecutar el menú y empezar el programa.
