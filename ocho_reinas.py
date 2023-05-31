@@ -10,7 +10,28 @@ Fecha de entrega: 01/06/2023
 Versión 1.3
 El código aquí presentado busca resolver de manera eficiente el problema de las 8 reinas con una implementación del algoritmo A* (A estrella)
 Intrucciones: 
+Al ejecutar el programa, se muestra un menú con las siguientes opciones:
 
+Opción 1: Ejecutar el código sin información adicional.
+Opción 2: Ejecutar el código con información adicional.
+Opción 3: Salir del programa.
+Si seleccionas la opción 1, se te solicitará ingresar el valor de N, que representa el número de reinas en el problema. 
+Luego, se te preguntará si deseas ingresar un estado inicial. Si seleccionas "S" (Sí), se te pedirá que ingreses manualmente el estado inicial del tablero de reinas.
+Este estado inicial lo debes ingresar fila por fila del tablero considerando que las dimensiones del mimso serán de NxN. 
+De lo contrario, se utilizará un estado inicial aleatorio.
+
+El programa mostrará el valor de N y el estado inicial proporcionado.
+A continuación resolverá el problema de las reinas utilizando el algoritmo A* y el estado inicial proporcionado (o aleatorio).
+Se mostrará el estado final del tablero (solución), donde las reinas se representan con el valor 1 en las celdas correspondientes.
+También se mostrará el número de iteraciones que realizó el código para encontrar la solución.
+Finalmente, se mostrará el tiempo de ejecución del algoritmo en segundos.
+
+Si seleccionas la opción 2, el proceso es similar al de la opción 1, pero se mostrará información adicional durante la ejecución del código.
+Se te solicitará ingresar el valor de N y si deseas ingresar un estado inicial.
+Además, se mostrará el valor de N y el estado inicial proporcionado.
+Durante la ejecución del código, se mostrarán los pasos y resultados intermedios para comprender mejor el proceso.
+Al finalizar, se mostrará el estado final del tablero (solución), el número de iteraciones realizadas y el tiempo de ejecución en segundos.
+Si seleccionas la opción 3, el programa se cerrará y finalizará la ejecución.
 """
 """Dependencia"""
 import heapq
@@ -20,7 +41,7 @@ import time
 """CLASES Y FUNCIONES DE APOYO"""
 
 """ La función menu busca implementar un menú para facilitar el uso del programa, dando opciones variadas  que el usuario puede elegir """
-def menu():
+def menu(): #Javier Vázquez Gurrola y Joel Vázquez Anaya
     while True:
         print("\nMenú:")
         print("1. Ejecutar código")
@@ -101,7 +122,7 @@ def menu():
 
 
 """La función print_board imprime el tablero en la consola."""
-def print_board(board):
+def print_board(board): #Javier Vázquez Gurrola
     for row in board:
         print(row)
 
@@ -113,7 +134,7 @@ board: una matriz que representa el tablero con las reinas colocadas.
 row y col: las coordenadas de la próxima casilla a explorar.
 cost: el costo acumulado para llegar al estado actual.
 heuristic: la heurística estimada para el estado actual."""
-class State:
+class State: #Francisco Anaya Viveros
     def __init__(self, board, row, col, cost, heuristic):
         self.board = board
         self.row = row
@@ -123,7 +144,7 @@ class State:
 
 #La clase State también define el método especial __lt__ que compara dos objetos State en función de la suma del costo y la heurística. 
 #Esto permite utilizar la clase en una cola de prioridad para garantizar que los estados se expandan en el orden adecuado durante la búsqueda A*.
-    def __lt__(self, other):
+    def __lt__(self, other): #Francisco Anaya Viveros
         # Método para comparar dos estados basado en la suma del costo y la heurística
         return (self.cost + self.heuristic) < (other.cost + other.heuristic)
 
@@ -133,14 +154,14 @@ Las reinas se colocan en filas diferentes y en columnas seleccionadas al azar, a
 El resultado es un tablero que representa un estado inicial aleatorio para resolver el problema de las reinas, 
 donde cada casilla con el valor 1 indica la presencia de una reina en esa posición del tablero."""
 # Función para obtener un estado inicial aleatorio
-def get_random_initial_state(N):
+def get_random_initial_state(N): #Javier Vázquez Gurrola
     board = [[0] * N for _ in range(N)]
     queens = random.sample(range(N), N)
     for row, col in enumerate(queens):
         board[row][col] = 1
     return board
 
-def get_random_initial_state_con_pasos(N):
+def get_random_initial_state_con_pasos(N):#Joel Vázquez Anaya
     board = [[0] * N for _ in range(N)]
     print("Delimitamos los bordes del tablero, de la siguiente  [[0] * N for _ in range(N)]")
     print(board)
@@ -174,7 +195,7 @@ Para las diagonales secundarias, se verifica si hay una reina en las posiciones 
 Si se encuentra una reina en cualquiera de estas posiciones, se incrementa la heurística en 1.
 Al finalizar los bucles, se retorna el valor de la heurística, que representa el número de reinas que se amenazan mutuamente en el tablero.
 """
-def calculate_heuristic(board, N):
+def calculate_heuristic(board, N): #Francisco Anaya Viveros y Javier Vázquez Gurrola
     heuristic = 0
     for i in range(N):
         for j in range(N):
@@ -197,7 +218,7 @@ def calculate_heuristic(board, N):
                         heuristic += 1
     return heuristic
 
-def calculate_heuristic_con_pasos(board, N):
+def calculate_heuristic_con_pasos(board, N):#Joel Vázquez Anaya
     heuristic_con_pasos = 0
     for i in range(N):
         for j in range(N):
@@ -255,7 +276,7 @@ Si ninguna de las verificaciones anteriores detecta una amenaza de otras reinas 
 se asume que es seguro colocar una reina en la posición actual y se retorna True. 
 Esto indica que la posición actual es válida y no hay reinas que se amenacen directamente desde esa posición.
 """
-def is_safe(board, row, col, N):
+def is_safe(board, row, col, N): #Javier Vázquez Gurrola
     # Verificar si hay una reina en la misma fila
     for i in range(col):
         if board[row][i] == 1:
@@ -273,7 +294,7 @@ def is_safe(board, row, col, N):
 
     return True
 
-def is_safe_con_pasos(board, row, col, N):
+def is_safe_con_pasos(board, row, col, N): #Joel Vázquez Anaya
     iteracion = 0
     # Verificar si hay una reina en la misma fila
     print("Verificar si hay una reina en la misma fila")
@@ -308,7 +329,8 @@ Si no, se generan los sucesores del estado actual colocando una reina en cada co
 Cada sucesor tiene un nuevo tablero, un costo incrementado en 1 y una nueva heurística calculada para el nuevo tablero. 
 Estos sucesores se agregan a la cola de prioridad.
 El bucle continúa hasta que se encuentre una solución o no haya más estados por explorar."""
-def solve_n_queens_a_star(N, initial_board,iteraciones):
+
+def solve_n_queens_a_star(N, initial_board,iteraciones): #Javier Vázquez Gurrola y Joel Vázquez Anaya
     # Crear un tablero vacío de tamaño NxN, creando una matriz bidimensional de tamaño NxN y la inicializa con ceros.
     board = [[0 for _ in range(N)] for _ in range(N)]
     empty_board = [[0 for _ in range(N)] for _ in range(N)]
@@ -364,7 +386,7 @@ def solve_n_queens_a_star(N, initial_board,iteraciones):
     # Si no se encontró ninguna solución, retornar None
     return None
 
-def solve_n_queens_a_star_con_pasos(N, initial_board_con_pasos, iteraciones):
+def solve_n_queens_a_star_con_pasos(N, initial_board_con_pasos, iteraciones): #Joel Vázquez Anaya
     # Crear un tablero vacío de tamaño NxN, creando una matriz bidimensional de tamaño NxN y la inicializa con ceros.
     board = [[0 for _ in range(N)] for _ in range(N)]
     empty_board = [[0 for _ in range(N)] for _ in range(N)]
