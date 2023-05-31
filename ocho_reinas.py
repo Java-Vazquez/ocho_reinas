@@ -7,7 +7,7 @@ Joel Vázquez Anaya
 Javier Vázquez Gurrola
 Generación del archivo: 22/05/2023
 Fecha de entrega: 01/06/2023
-Versión 1.3
+Versión 2.8
 El código aquí presentado busca resolver de manera eficiente el problema de las 8 reinas con una implementación del algoritmo A* (A estrella)
 Intrucciones: 
 Al ejecutar el programa, se muestra un menú con las siguientes opciones:
@@ -152,7 +152,9 @@ class State: #Francisco Anaya Viveros
 Esta función crea un tablero vacío de tamaño NxN y luego coloca N reinas de forma aleatoria en el tablero. 
 Las reinas se colocan en filas diferentes y en columnas seleccionadas al azar, asegurando que no haya dos reinas en la misma columna. 
 El resultado es un tablero que representa un estado inicial aleatorio para resolver el problema de las reinas, 
-donde cada casilla con el valor 1 indica la presencia de una reina en esa posición del tablero."""
+donde cada casilla con el valor 1 indica la presencia de una reina en esa posición del tablero.
+N: número de reinas
+return board: matriz con valores 1 aleatorios"""
 # Función para obtener un estado inicial aleatorio
 def get_random_initial_state(N): #Javier Vázquez Gurrola
     board = [[0] * N for _ in range(N)]
@@ -194,6 +196,9 @@ Si se encuentra una reina en cualquiera de estas posiciones, se incrementa la he
 Para las diagonales secundarias, se verifica si hay una reina en las posiciones (i+k, j-k), (i-k, j+k), (i+k, j+k), (i-k, j-k) con k desde 1 hasta N-1. 
 Si se encuentra una reina en cualquiera de estas posiciones, se incrementa la heurística en 1.
 Al finalizar los bucles, se retorna el valor de la heurística, que representa el número de reinas que se amenazan mutuamente en el tablero.
+N: número de reinas
+board: matriz de NXN que representa el tablero
+return heuristic: valor de la heurística
 """
 def calculate_heuristic(board, N): #Francisco Anaya Viveros y Javier Vázquez Gurrola
     heuristic = 0
@@ -275,6 +280,10 @@ En este caso, se retorna False indicando que no es seguro.
 Si ninguna de las verificaciones anteriores detecta una amenaza de otras reinas en la misma fila o en las diagonales, 
 se asume que es seguro colocar una reina en la posición actual y se retorna True. 
 Esto indica que la posición actual es válida y no hay reinas que se amenacen directamente desde esa posición.
+board: matriz de NXN que representa el tablero
+row: fila 
+col: columna
+N: número de reinas
 """
 def is_safe(board, row, col, N): #Javier Vázquez Gurrola
     # Verificar si hay una reina en la misma fila
@@ -328,7 +337,11 @@ Si se alcanza la última fila del tablero, se ha encontrado una solución y se d
 Si no, se generan los sucesores del estado actual colocando una reina en cada columna segura. 
 Cada sucesor tiene un nuevo tablero, un costo incrementado en 1 y una nueva heurística calculada para el nuevo tablero. 
 Estos sucesores se agregan a la cola de prioridad.
-El bucle continúa hasta que se encuentre una solución o no haya más estados por explorar."""
+El bucle continúa hasta que se encuentre una solución o no haya más estados por explorar.
+N: número de reinas
+initial_board: matriz de NxN que representa el estado inicial del problema
+iteraciones: número de iteraciones
+"""
 
 def solve_n_queens_a_star(N, initial_board,iteraciones): #Javier Vázquez Gurrola y Joel Vázquez Anaya
     # Crear un tablero vacío de tamaño NxN, creando una matriz bidimensional de tamaño NxN y la inicializa con ceros.
